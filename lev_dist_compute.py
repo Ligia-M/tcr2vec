@@ -21,7 +21,8 @@ class lev_analyses():
     def get_lev(self, feat, fname, cdr3col, col1, col_val1, col2, col_val2,
                 farr, outname, strings_given=False, strings_not=False,
                 per_1=False, per_2=False, per_all=False, plot_col_colors=False):
-        '''d: pandas dataframe
+        '''
+        d: pandas dataframe
         feat = str, a feature to sort the data (hla, epitope, length,  etc)
         fname = npy file that contains the strings if boolean strings_given = True
         farr = npy file with corresponding feature values if boolean strings_given = True
@@ -35,7 +36,8 @@ class lev_analyses():
             if per_2 = visualize data filtered for 2 characteristics (ex. J-gene / V-family)
             if per_all = visualize entire data (d) sorted by feature
                         (directs visualization to exhibit certain patterns)
-        if strings_given = strings already extracted in npy file format '''
+        if strings_given = strings already extracted in npy file format 
+        '''
         if strings_not:
             if per_1:
                 d = self.d[self.d[str(col1)] == col_val1].sort_values(str(feat))
@@ -83,14 +85,15 @@ class lev_analyses():
         print('Standard deviation:{}'.format(np.std(distance_matrix)))
     '''Generate random levensthein matrix'''
     def rndm_lev_mat(self, perm_n, n, col1, col2, col_val1, col_val2, feat_vals, feat_col, filt_1=False, filt_2=False, filt_more=False):
-        ''' d: pandas dataframe
-            perm_n: int, permuation number, ex) 10 000
-            n = int, size of random sample
-            col1, col2 = str, column name ex) 'aggr_j' or 'aggr_v'
-            col_val1, colval2 = int or str, column value for filtering dataframe ex) 1 or 'HLA-DRA*01'
-            feat_vals: a list of classes of feature of interest, ex) ['HLA-B*07', 'HLA-DRA*01', 'HLA-A*02','HLA-A*24']
-            feat_col: str name of feature column feat_vals come from, ex) 'hla_ag'
-            '''
+        ''' 
+        d: pandas dataframe
+        perm_n: int, permuation number, ex) 10 000
+        n = int, size of random sample
+        col1, col2 = str, column name ex) 'aggr_j' or 'aggr_v'
+        col_val1, colval2 = int or str, column value for filtering dataframe ex) 1 or 'HLA-DRA*01'
+        feat_vals: a list of classes of feature of interest, ex) ['HLA-B*07', 'HLA-DRA*01', 'HLA-A*02','HLA-A*24']
+        feat_col: str name of feature column feat_vals come from, ex) 'hla_ag'
+        '''
         avg =[]
         sd = []
         for i in range(1, perm_n):
