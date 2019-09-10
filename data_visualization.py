@@ -129,9 +129,8 @@ class DataVis:
         # fig.patch.set_variable(False)
         ax.axis('off')
         # ax.set_title('VDJDB: J-2 Epitope Species', weight= 'bold')
-        # ax.legend(loc= 'lower right', markerscale=4) #bbox_to_anchor=(1.04,0),#the bbanchor & loc is only needed for when lgend = theres a shitload
         ax.legend(bbox_to_anchor=(1.04, 0), loc='lower left',
-                  markerscale=4)  # bbox_to_anchor=(1.04,0),#the bbanchor & loc is only needed for when lgend = theres a shitload
+                  markerscale=4)  # bbox_to_anchor=(1.04,0),#the bbanchor & loc is only needed for when lgend = too many
         if um:
             fig.savefig(str(fname) + '_umap_{}.png'.format((str(feature))), bbox_inches='tight',
                         dpi=fig.dpi)  # , dpi=fig.dpi)
