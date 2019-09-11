@@ -6,16 +6,12 @@ Created on Fri Jun 14 13:04:31 2019
 @author: ligia
 """
 
-import multiprocessing as mp
 # from multiprocessing import Pool, Process
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
-import glob
-from random import shuffle
+from gensim.models.word2vec import Word2Vec
+from generate_embeddings import W2vProcessing
 
-import code.thesis_embeddings_functions as ef
-'''Load variables '''
 
 class GetGenerators:
     def __init__(self, x, n):
@@ -24,8 +20,9 @@ class GetGenerators:
         :param n: int, number of random sequences to create generator
         '''
         self.arr_fl = x.ravel()
-        self.w2v = ef.load_model('w2vmodel_100D_allP.bin')
+        self.w2v = Word2Vec.load('w2vmodel_100D_allP.bin')
         self.n = n
+
     def gen_prep(self, filename, epispe, cmv=False, pathogen=False):
         '''
         :param filename: str,  name of generators
@@ -44,11 +41,14 @@ class GetGenerators:
             ext_seqs = kn_seqs[kn_seqs['Epitope species'] == epispe].\
                 drop_duplicates('CDR3').sample(self.n)
             ext_seqs.to_csv('{}_cdr3name.csv'.format(epispe))
-        tokens_sum = ef.processing_token_sum(ext_seqs, 'CDR3')
+        ge = W2vProcessing('/home/ligia/Desktop/Emerson2017/')
+        tokens_sum = ge.processing_token_sum(ext_seqs, 'CDR3')
         ext_seqs['tokens_sum'] = [inner_list for inner_list in tokens_sum]
         ext_seqs['vec_sequence'] = list(map(lambda exp_seq:
-                                        ef.get_sequence_vectors(self.w2v, exp_seq),
+                                        ge.get_sequence_vectors(self.w2v, exp_seq),
                                         ext_seqs.tokens_sum))
         vec_weights = np.array(list(map(np.array, ext_seqs.vec_sequence)))
+        print(vec_weights)
         np.save('generatorseqs_{}'.format(filename), vec_weights)
+
 
