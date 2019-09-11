@@ -17,22 +17,24 @@ from gensim.models.word2vec import Word2Vec
 
 class W2vProcessing:
     def __init__(self, dir_loc):
+        '''
+        :param dir_loc: folder with all zip files
+        '''
         self.fcols = ['sample_name', 'amino_acid', 'sample_tags', 'v_family', 'j_gene']
         self.tcols = ['sample_name', 'amino_acid', 'sample_tags']
-        self.all_zips = os.listdir(dir_loc) #folder with zipfiles ex."/home/ligia/Desktop/Emerson2017/temp/"
+        self.all_zips = dir_loc #ex. "/home/ligia/Desktop/Emerson2017/temp/"
         self.v_vals = ['TCRBV20', 'TCRBV12', 'TCRBV25', 'TCRBV13']
 
-    def create_main_file(self, dirloc, train_sA_w2v=False, train_all_w2v=True, feat_only=False):
+    def create_main_file(self, train_sA_w2v=False, train_all_w2v=True, feat_only=False):
         '''
-        :param dirloc: folder with all zip files
         :param train_sA_w2v: if sample A dataset (filter for V-families)
         :param train_all_w2v: if train a W2V model with all dataset
         :param feat_only: extract attributes
         :return: a dataframe without duplicates, stop codons and missing CDR3 values
         '''
         main_file_temp = []
-        for zip_file in self.all_zips:
-            zip = zipfile.ZipFile(str(dirloc) + str(zip_file))
+        for zip_file in os.listdir(self.all_zips):
+            zip = zipfile.ZipFile(str(self.all_zips) + str(zip_file))
             files_in_zip = zip.infolist()
             if train_sA_w2v:
                 for file in files_in_zip:
@@ -124,11 +126,11 @@ class W2vProcessing:
         :param tokens_training: variable from processing_training_tokens function
         :return: initializes, train and save model
         '''
-        num_features = 100  # embedding size
-        min_word_count = 3  
-        num_workers = 8 
-        context = 25 
-        downsampling = 1e-3 
+        num_features = 100  # vector size
+        min_word_count = 3
+        num_workers = 8
+        context = 25
+        downsampling = 1e-3
         W2Vmodel = Word2Vec(sentences=tokens_training,
                             sg=1,
                             hs=0,
@@ -141,7 +143,7 @@ class W2vProcessing:
                             iter=6)
         W2Vmodel.train(tokens_training, total_examples=len(tokens_training), epochs=10)
         W2Vmodel.save('w2vmodel_{}.bin'.format(filename))
-    
+
     ''' Sum vectors across sequence '''
     def get_sequence_vectors(self, vec_model, expanded_sequences):
         k_mers = np.concatenate(expanded_sequences)  # kmer in text
@@ -154,9 +156,8 @@ class W2vProcessing:
                 kmer_count += 1
         return dim_4_row
 
-    def call_vecs_fncts(self, dirloc, main_data, cdr3, filename, train=True, exp1=False, exp2=False):
+    def call_vecs_fncts(self, main_data, cdr3, filename, train=True, exp1=False, exp2=False):
         '''
-        :param dirloc: folder with all zip files
         :param main_data: dataframe
         :param cdr3: str, either 'amino_acid' for emerson and 'CDR3' for vdjdb
         :param filename: str, name of the outbound vector file and w2v model
@@ -168,7 +169,7 @@ class W2vProcessing:
         if train:
             if exp1:
                 print('Extracting files...')
-                main = self.create_main_file(dirloc, train_all_w2v=True)
+                main = self.create_main_file(train_all_w2v=True)
                 print('All files read')
                 print(main['amino_acid'].str.contains('\*').value_counts()[True])
                 # drop sequences with stop codons
@@ -190,5 +191,4 @@ class W2vProcessing:
         vec_weights = np.array(list(map(np.array, main_data.vec_sequence)))
         np.save(filename, vec_weights)
         print('Done.')
-
 
