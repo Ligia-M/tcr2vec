@@ -124,11 +124,11 @@ class W2vProcessing:
         :param tokens_training: variable from processing_training_tokens function
         :return: initializes, train and save model
         '''
-        num_features = 100  # Word vector dimensionality
-        min_word_count = 3  # Minimum word count
-        num_workers = 8  # Number of threads to run in parallel
-        context = 2  # Context window size
-        downsampling = 1e-3  # Downsample setting for frequent words
+        num_features = 100  # embedding size
+        min_word_count = 3  
+        num_workers = 8 
+        context = 25 
+        downsampling = 1e-3 
         W2Vmodel = Word2Vec(sentences=tokens_training,
                             sg=1,
                             hs=0,
@@ -139,7 +139,6 @@ class W2vProcessing:
                             sample=downsampling,
                             negative=5,
                             iter=6)
-        # train model
         W2Vmodel.train(tokens_training, total_examples=len(tokens_training), epochs=10)
         W2Vmodel.save('w2vmodel_{}.bin'.format(filename))
     
