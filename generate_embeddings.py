@@ -145,23 +145,14 @@ class W2vProcessing:
     
     ''' Sum vectors across sequence '''
     def get_sequence_vectors(self, vec_model, expanded_sequences):
-        """ Transform a sentence_group (containing multiple lists
-        of words) into a feature vector. It averages out all the
-        word vectors of the sentence_group.
-        """
         k_mers = np.concatenate(expanded_sequences)  # kmer in text
         kmer_keys = set(vec_model.wv.vocab.keys())  # known kmer
         dim_4_row = np.zeros(vec_model.vector_size, dtype="float32")
-        # Initialize a counter for number of words in a review
         kmer_count = 0
-        # Loop over each word in the comment and, if it is in the model's vocabulary, add its feature vector to the total
         for kmer in k_mers:
             if kmer in kmer_keys:
                 dim_4_row = np.add(dim_4_row, vec_model[kmer])
                 kmer_count += 1
-    #    # Divide the result by the number of words to get the average
-    #    if nwords > 0:
-    #        featureVec = np.divide(featureVec, nwords)
         return dim_4_row
 
     def call_vecs_fncts(self, dirloc, main_data, cdr3, filename, train=True, exp1=False, exp2=False):
