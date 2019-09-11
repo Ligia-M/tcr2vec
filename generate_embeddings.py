@@ -19,9 +19,10 @@ class W2vProcessing:
     def __init__(self, dir_loc):
         self.fcols = ['sample_name', 'amino_acid', 'sample_tags', 'v_family', 'j_gene']
         self.tcols = ['sample_name', 'amino_acid', 'sample_tags']
-        self.all_zips = os.listdir(dir_loc) #ex. "/home/ligia/Desktop/Emerson2017/temp/"
+        self.all_zips = os.listdir(dir_loc) #folder with zipfiles ex."/home/ligia/Desktop/Emerson2017/temp/"
         self.v_vals = ['TCRBV20', 'TCRBV12', 'TCRBV25', 'TCRBV13']
-    def create_main_file(self, dirloc, train_sA_w2v=False, train_all_w2v=False, feat_only=False):
+
+    def create_main_file(self, dirloc, train_sA_w2v=False, train_all_w2v=True, feat_only=False):
         '''
         :param dirloc: folder with all zip files
         :param train_sA_w2v: if sample A dataset (filter for V-families)
@@ -61,6 +62,7 @@ class W2vProcessing:
             main_file = main_file.dropna().reset_index(drop = True)
             main_file = main_file[~main_file.duplicated(subset = ['amino_acid', 'sample_name'], keep = 'first')]
         return main_file
+
     def processing_training_tokens(self, main_data, cdr3):
         '''
         :param main_data: dataframe
@@ -80,6 +82,7 @@ class W2vProcessing:
                 inner3.append( "".join(x[i:i + 3]))
             processed_4_w2v_training.extend([inner1,inner2, inner3])
         return processed_4_w2v_training
+
     def processing_token_sum(self, main_data, cdr3):
         '''
         :param main_data: dataframe
@@ -99,19 +102,23 @@ class W2vProcessing:
                 inner3.append( "".join(x[i:i + 3]))
             processed_4_w2v_sum.append([inner1,inner2, inner3])
         return processed_4_w2v_sum
+
     def load_model(self, model_name):
         '''
         :param model_name: bin file where model is saved in
         :return: opens the w2v model file
         '''
         return Word2Vec.load(model_name)
+
     def save_file(self, filename):
         with open(filename, 'wb') as fp:
             pickle.dump(filename, fp)
+
     def open_file(self, filename):
         file = open(filename, 'rb')
         opened_file = pickle.load(file)
         return opened_file
+
     def init_model(self, tokens_training, filename):
         '''
         :param tokens_training: variable from processing_training_tokens function
@@ -135,6 +142,7 @@ class W2vProcessing:
         # train model
         W2Vmodel.train(tokens_training, total_examples=len(tokens_training), epochs=10)
         W2Vmodel.save('w2vmodel_{}.bin'.format(filename))
+    
     ''' Sum vectors across sequence '''
     def get_sequence_vectors(self, vec_model, expanded_sequences):
         """ Transform a sentence_group (containing multiple lists
@@ -155,6 +163,7 @@ class W2vProcessing:
     #    if nwords > 0:
     #        featureVec = np.divide(featureVec, nwords)
         return dim_4_row
+
     def call_vecs_fncts(self, dirloc, main_data, cdr3, filename, train=True, exp1=False, exp2=False):
         '''
         :param dirloc: folder with all zip files
@@ -193,86 +202,3 @@ class W2vProcessing:
         print('Done.')
 
 
-
-''' features for TSNE '''
-
-
-
-
-#%%
-    
-''' Generate cmv three classes (unique +, uniqe -, shared) feature '''
-
-def fill_rows(row):
-    if row['dup'] == False and row['Virus Diseases'] == 'Cytomegalovirus -':
-        return 'Negative status'
-    if row['dup'] == False and row['Virus Diseases'] == 'Cytomegalovirus +':
-        return 'Positive status'
-    if row['dup'] == True: 
-        return 'Shared'
-
-
-def cmv_cat(data): 
-    ''' 
-    iterate through data 
-    
-    if amino acid has no duplicate & cmv == '- cmv '--> third column = 0 
-    
-    ifelse amino acid no dupli & positive --> 1 
-    
-    if duplicate --> 2 '''
-    
-
-    duplicates = data.duplicated(subset=['amino_acid'], keep='first')
-    
-    data['dup'] = duplicates
-    
-    data['cmv_newlabel'] = data.apply(lambda row: fill_rows(row), axis = 1)
-    
-    return data 
-
-
-
-#df_features['hla'] = df_features['HLA MHC class I'].str[4:8]
-#
-##st = st.set_index('HLA')
-#st['hla'] = st['HLA'].str[0:4]
-#
-#df_features.join(st.set_index('hla'), on='hla')
-
-''' extract features from description "sample_tags"
-    returns a dataframe of all features of interest '''
-    
-    
-def get_features(data, cmv_new = True, length = True):
-    #specify features of interest with separate variable for features in textual description
-    # feats_og = data[['v_family', 'amino_acid', 'v_gene', 'j_family','j_gene', 'cdr3_length', 'sample_name']]
-    feats_og = data[['v_family', 'amino_acid', 'j_gene', 'sample_name']]
-    feats_description = data['sample_tags']
-    #extracting features from description
-    split_comma = feats_description.apply(lambda x: x.split(','))
-    split_colon = [[tuple(pair.split(':')) for pair in row] for row in split_comma]
-    df_features = pd.DataFrame([{x[0]:x[1] for x in row}for row in split_colon])
-    #concatenate all features into single dataframe
-    df_features = pd.concat([feats_og.reset_index(drop=True), df_features.reset_index(drop=True)], axis = 1)
-    #adding feature 
-    if cmv_new: 
-        df_features= cmv_cat(df_features)
-    if length: 
-        df_features['seq_length'] = df_features['amino_acid'].str.len()
-#    df_features = df_features.drop('amino_acid', axis = 1)
-    return df_features
-
-def generate_labels(df_cols):
-    
-    encoded_features  = pd.DataFrame({col: df_cols[col].astype('category').
-                                      cat.codes for col in df_cols}, index=df_cols.index)
-    
-    #generate dictionary of mapping between label and feature 
-    feature_label_dic = {col: {n: cat for n, cat in enumerate(df_cols[col].astype('category').cat.categories)} 
-         for col in df_cols}
-
-    #retrieve array of labels per sequence
-    feature_arrays = encoded_features.values
-    
-    return feature_arrays, feature_label_dic
