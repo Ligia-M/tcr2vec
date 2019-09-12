@@ -191,4 +191,6 @@ class W2vProcessing:
         vec_weights = np.array(list(map(np.array, main_data.vec_sequence)))
         np.save(filename, vec_weights)
         print('Done.')
+        main_data = main_data.drop('vec_sequence', axis=1)
+        return main_data
 
