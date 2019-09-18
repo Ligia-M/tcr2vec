@@ -1,4 +1,4 @@
-# thesis_files
+# tcr2vec
 Files for running Tcr2Vec model.
 
 
