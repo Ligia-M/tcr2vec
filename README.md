@@ -1,5 +1,4 @@
 # tcr2vec
-Files for running Tcr2Vec model.
 
 
 call_fncts.py can call all functions from classes specified in the analyses files. 
