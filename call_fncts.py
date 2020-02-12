@@ -2,7 +2,7 @@ from annot_seqs import AnnotateSeqs
 from cos_antigen_vdjdb import CosinePathogenAnalysis
 from lev_dist_compute import LevAnalyses
 from fisher_analysis import FishAnalyses
-from runnin_cossimv2 import top_k_analyses #the one that doesnt work --> use non class file instead
+from runnin_cossimv2 import top_k_analyses 
 from cosine_analysis import OutputTopkAnalysis
 from data_visualization import DataVis
 from getting_generator_sequences import GetGenerators
