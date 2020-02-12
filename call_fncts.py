@@ -15,6 +15,8 @@ import numpy as np
 import glob
 
 
+'''Generate embeddings'''
+
 # open_csv has booleans vdjdb = False, ss= False, concat = False
 #first argument is file name
 #function drops NaNs, reset index
@@ -22,8 +24,6 @@ import glob
 # -> concat is for the concatenation between 2 CSVs (ex. immunized vs non-immunized)
 #second string space is for second file in concat, otherwise leave blank
 
-
-'''Generate embeddings'''
 w2v = W2vProcessing('/home/ligia/Desktop/Emerson2017/')
 cpa = CosinePathogenAnalysis('/home/ligia/Desktop/Emerson2017/','vec_weights100D_allP_vdjdb.npy')
 beta = cpa.open_csv('SearchTable-2019-05-28 21_49_18.859.tsv', '', vdjdb=True)
